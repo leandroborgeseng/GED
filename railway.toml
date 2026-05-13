@@ -8,6 +8,7 @@
 #    - Root directory: vazio (raiz do repo), para o contexto do Docker incluir apps/backend/
 #    - OBRIGATÓRIO no serviço da API: DATABASE_URL=${{ NomeDoPostgres.DATABASE_URL }} (Reference Variable).
 #      O Railway NÃO injeta o Postgres na API sozinho — sem isso: P1012 ao iniciar (prisma migrate deploy).
+#    - OBRIGATÓRIO: JWT_SECRET (string longa). Sem isso: erro ao subir o Nest (ConfigService JWT_SECRET).
 #    - Veja railway.env.example para um modelo de variáveis.
 #    - JWT_SECRET, CORS_ORIGIN (URL pública do frontend), MAYAN_* quando houver Mayan.
 #

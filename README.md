@@ -104,6 +104,7 @@ Credenciais e segredos em `docker/homolog.env` são **só para homologação**; 
    - Fonte: mesmo repo. **Root directory**: deixe em branco (raiz).  
    - **Dockerfile**: `apps/backend/Dockerfile` (o `railway.toml` na raiz já aponta para ele).  
    - **Variables (crítico):** no serviço da API, crie **`DATABASE_URL`** com **Reference Variable** apontando para o Postgres do projeto, por exemplo `${{ Postgres.DATABASE_URL }}` (troque `Postgres` pelo **nome exato** do serviço de banco no painel). Sem isso o container falha com **P1012** ao rodar `prisma migrate deploy`.  
+   - Crie também **`JWT_SECRET`** (string longa e aleatória; sem ela a API cai com *Configuration key JWT_SECRET does not exist*).  
    - Veja também o ficheiro [`railway.env.example`](railway.env.example) para colar no RAW Editor (ajustando o nome do serviço Postgres).  
    - Outras variáveis: `JWT_SECRET` (obrigatório em produção), `CORS_ORIGIN` (URL pública do frontend), e `MAYAN_*` quando o Mayan estiver disponível.  
    - Gere um domínio público para a API e anote a URL base (ex. `https://ged-api-production.up.railway.app`).

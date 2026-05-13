@@ -10,5 +10,14 @@ if [ -z "$DATABASE_URL" ]; then
   echo "==================================================================="
   exit 1
 fi
+if [ -z "$JWT_SECRET" ]; then
+  echo "==================================================================="
+  echo "GED API: JWT_SECRET não está definida."
+  echo "No Railway: serviço da API → Variables → New Variable"
+  echo "Nome: JWT_SECRET"
+  echo "Valor: uma string longa e aleatória (ex.: openssl rand -hex 32)"
+  echo "==================================================================="
+  exit 1
+fi
 npx prisma migrate deploy
 exec node dist/src/main.js
