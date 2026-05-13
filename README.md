@@ -119,6 +119,7 @@ Credenciais e segredos em `docker/homolog.env` são **só para homologação**; 
 ### 502 ou “porta 3000” na Railway
 
 - **Não coloques `:3000` nem `:4000` no URL público** (`https://….up.railway.app`). O acesso é sempre por **HTTPS na porta 443**; o Railway encaminha para a porta interna que define em `PORT` (nos logs da API costuma aparecer como `8080` dentro do contentor). `https://teu-dominio.up.railway.app:3000` **não** aponta para a app e costuma resultar em **502** ou falha de ligação.
+- A API Nest passa a escutar em **`0.0.0.0`** (e `HOST` opcional); sem isto, alguns ambientes só aceitam ligações em `127.0.0.1` e o proxy da Railway devolve **502** em `GET /`.
 - O serviço cujo deploy mostra **Nest** (rotas `/api/...`) é só a **API**. A **interface (Next.js)** é outro serviço, com outro domínio gerado na Railway — abre esse URL **sem** sufixo de porta.
 - Para testar a API: `https://<domínio-da-api>/` (JSON de ajuda) ou `https://<domínio-da-api>/api/health`.
 

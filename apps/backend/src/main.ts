@@ -30,9 +30,10 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api/docs', app, document);
 
-  const port = process.env.PORT ?? 4000;
-  await app.listen(port);
+  const port = Number(process.env.PORT) || 4000;
+  const host = process.env.HOST ?? '0.0.0.0';
+  await app.listen(port, host);
   // eslint-disable-next-line no-console
-  console.log(`API http://localhost:${port}/ (info) — REST http://localhost:${port}/api — docs /api/docs`);
+  console.log(`API http://${host}:${port}/ (info) — REST http://${host}:${port}/api — docs /api/docs`);
 }
 bootstrap();
