@@ -1,0 +1,61 @@
+# GED local (Postgres + API + Web) a partir da pasta do backend.
+# O contexto de build é sempre a raiz do monorepo (Dockerfiles com COPY apps/...).
+#
+# Uso:
+#   cd apps/backend && npm run docker:up
+#   # ou: docker compose -f docker-compose.yml up --build
+#
+# Seed (opcional): docker compose exec api npx prisma db seed
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ged
+      POSTGRES_PASSWORD: ged
+      POSTGRES_DB: ged
+    ports:
+      - '5432:5432'
+    volumes:
+      - ged_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ged -d ged']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ../..
+      dockerfile: apps/backend/Dockerfile
+    ports:
+      - '4000:4000'
+    environment:
+      PORT: '4000'
+      DATABASE_URL: postgresql://ged:ged@postgres:5432/ged?schema=public
+      JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-change-in-prod}
+      CORS_ORIGIN: http://localhost:3000
+      PAPERLESS_API_URL: ${PAPERLESS_API_URL:-http://host.docker.internal:8010}
+      PAPERLESS_USERNAME: ${PAPERLESS_USERNAME:-}
+      PAPERLESS_PASSWORD: ${PAPERLESS_PASSWORD:-}
+      PAPERLESS_TOKEN: ${PAPERLESS_TOKEN:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ../..
+      dockerfile: apps/frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000/api}
+    ports:
+      - '3000:3000'
+    environment:
+      PORT: '3000'
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000/api}
+    depends_on:
+      - api
+
+volumes:
+  ged_pg:

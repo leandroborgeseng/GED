@@ -57,9 +57,19 @@ npm run build
 
 ## Docker (API + web + Postgres)
 
+Na **raiz** do repositório:
+
 ```bash
 docker compose up --build
 ```
+
+Ou a partir do **backend** (mesmo stack; o compose usa contexto na raiz do monorepo):
+
+```bash
+cd apps/backend && npm run docker:up
+```
+
+(Ficheiro: [`apps/backend/docker-compose.yml`](apps/backend/docker-compose.yml).) Para parar: `cd apps/backend && npm run docker:down`.
 
 Defina `JWT_SECRET` e, se usar Paperless, `PAPERLESS_API_URL` e (`PAPERLESS_TOKEN` **ou** `PAPERLESS_USERNAME` + `PAPERLESS_PASSWORD`).
 
