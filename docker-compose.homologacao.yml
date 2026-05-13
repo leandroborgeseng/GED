@@ -1,12 +1,9 @@
-# Ambiente completo de homologação: GED (Postgres + API + Web) + Mayan EDMS (Postgres + Redis + RabbitMQ + app).
-# Arquitetura: processos separados na mesma rede Docker; a API fala com o Mayan por HTTP interno.
-#
+# Homologação: GED (Postgres + API + Web) + Paperless-ngx (Postgres + Redis + app).
 # Uso:
 #   docker compose -f docker-compose.homologacao.yml --env-file docker/homolog.env up -d --build
 #
-# Primeira vez com o Mayan: acesse http://localhost:8001 , conclua o assistente e crie o superusuário
-# com o mesmo login/senha definidos em docker/homolog.env (padrão admin / Admin123!).
-# Confira o ID do tipo de documento em http://localhost:8001 (ou GET /api/v4/document_types/) e ajuste MAYAN_DOCUMENT_TYPE_ID se necessário.
+# Paperless: http://localhost:8001 — na primeira subida o contentor cria o admin com
+# PAPERLESS_ADMIN_* abaixo (alinhado a docker/homolog.env). A API usa PAPERLESS_API_URL=http://paperless:8000 .
 
 name: ged-homolog
 
@@ -16,10 +13,12 @@ networks:
 
 volumes:
   ged_pg:
-  mayan_pg:
-  mayan_rabbitmq_data:
-  mayan_redis_data:
-  mayan_app:
+  paperless_pg:
+  paperless_redis:
+  paperless_data:
+  paperless_media:
+  paperless_export:
+  paperless_consume:
 
 services:
   postgres:
@@ -39,99 +38,73 @@ services:
       timeout: 5s
       retries: 15
 
-  mayan_postgres:
-    image: postgres:15-alpine
+  paperless_postgres:
+    image: postgres:16-alpine
     networks: [ged_hom]
-    shm_size: 128m
     environment:
-      POSTGRES_DB: mayan
-      POSTGRES_USER: mayan
-      POSTGRES_PASSWORD: mayandbpass
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: paperless
     volumes:
-      - mayan_pg:/var/lib/postgresql/data
+      - paperless_pg:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U mayan -d mayan']
+      test: ['CMD-SHELL', 'pg_isready -U paperless -d paperless']
       interval: 10s
       timeout: 5s
-      retries: 10
-      start_period: 30s
+      retries: 12
+      start_period: 20s
 
-  mayan_rabbitmq:
-    image: rabbitmq:4-management-alpine
+  paperless_broker:
+    image: redis:8-alpine
     networks: [ged_hom]
-    hostname: mayan_rabbitmq
-    environment:
-      RABBITMQ_DEFAULT_USER: mayan
-      RABBITMQ_DEFAULT_PASS: mayanrabbitpass
-      RABBITMQ_DEFAULT_VHOST: mayan
     volumes:
-      - mayan_rabbitmq_data:/var/lib/rabbitmq
+      - paperless_redis:/data
     healthcheck:
-      test: ['CMD', 'rabbitmq-diagnostics', 'ping']
-      interval: 15s
-      timeout: 30s
-      retries: 8
-      start_period: 40s
-
-  mayan_redis:
-    image: redis:7-alpine
-    networks: [ged_hom]
-    hostname: mayan_redis
-    command:
-      - redis-server
-      - --appendonly
-      - 'no'
-      - --databases
-      - '3'
-      - --maxmemory
-      - 256mb
-      - --maxmemory-policy
-      - allkeys-lru
-      - --save
-      - ''
-      - --requirepass
-      - mayanredispassword
-    volumes:
-      - mayan_redis_data:/data
-    healthcheck:
-      test: ['CMD', 'redis-cli', '-a', 'mayanredispassword', 'ping']
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
-      timeout: 5s
+      timeout: 3s
       retries: 10
-      start_period: 15s
+      start_period: 10s
 
-  mayan:
-    image: mayanedms/mayanedms:s4.11
+  paperless:
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
     networks: [ged_hom]
-    hostname: mayan
+    hostname: paperless
     depends_on:
-      mayan_postgres:
+      paperless_postgres:
         condition: service_healthy
-      mayan_rabbitmq:
-        condition: service_healthy
-      mayan_redis:
+      paperless_broker:
         condition: service_healthy
     ports:
       - '8001:8000'
-    environment:
-      MAYAN_DOCKER_WAIT: 'mayan_postgres:5432 mayan_rabbitmq:5672 mayan_redis:6379'
-      MAYAN_CELERY_BROKER_URL: amqp://mayan:mayanrabbitpass@mayan_rabbitmq:5672/mayan
-      MAYAN_CELERY_RESULT_BACKEND: redis://:mayanredispassword@mayan_redis:6379/1
-      MAYAN_DATABASES: "{'default':{'ENGINE':'django.db.backends.postgresql','NAME':'mayan','PASSWORD':'mayandbpass','USER':'mayan','HOST':'mayan_postgres','PORT':5432,'CONN_MAX_AGE':0}}"
-      MAYAN_LOCK_MANAGER_BACKEND: mayan.apps.lock_manager.backends.redis_lock.RedisLock
-      MAYAN_LOCK_MANAGER_BACKEND_ARGUMENTS: "{'redis_url':'redis://:mayanredispassword@mayan_redis:6379/2'}"
     volumes:
-      - mayan_app:/var/lib/mayan
+      - paperless_data:/usr/src/paperless/data
+      - paperless_media:/usr/src/paperless/media
+      - paperless_export:/usr/src/paperless/export
+      - paperless_consume:/usr/src/paperless/consume
+    environment:
+      PAPERLESS_REDIS: redis://paperless_broker:6379
+      PAPERLESS_DBHOST: paperless_postgres
+      PAPERLESS_DBNAME: paperless
+      PAPERLESS_DBUSER: paperless
+      PAPERLESS_DBPASS: paperless
+      PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY:-homolog-dev-secret-change-in-prod}
+      PAPERLESS_URL: http://localhost:8001
+      PAPERLESS_TIME_ZONE: America/Sao_Paulo
+      PAPERLESS_OCR_LANGUAGE: por
+      PAPERLESS_ADMIN_USER: ${PAPERLESS_USERNAME:-admin}
+      PAPERLESS_ADMIN_MAIL: ${PAPERLESS_ADMIN_MAIL:-admin@localhost}
+      PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_PASSWORD:-Admin123!}
     healthcheck:
       test:
         [
           'CMD-SHELL',
-          'exec /opt/mayan-edms/bin/python -c "import urllib.request; urllib.request.urlopen(''http://127.0.0.1:8000/'', timeout=5)"',
+          'wget -q -O /dev/null http://127.0.0.1:8000/accounts/login/ || exit 1',
         ]
-      interval: 30s
+      interval: 20s
       timeout: 10s
-      retries: 15
-      start_period: 180s
+      retries: 20
+      start_period: 120s
     restart: unless-stopped
 
   api:
@@ -146,14 +119,13 @@ services:
       DATABASE_URL: postgresql://ged:ged@postgres:5432/ged?schema=public
       JWT_SECRET: ${JWT_SECRET:-homolog-dev-jwt-change-me}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
-      MAYAN_API_URL: http://mayan:8000/api/v4
-      MAYAN_USERNAME: ${MAYAN_USERNAME:-admin}
-      MAYAN_PASSWORD: ${MAYAN_PASSWORD:-Admin123!}
-      MAYAN_DOCUMENT_TYPE_ID: ${MAYAN_DOCUMENT_TYPE_ID:-1}
+      PAPERLESS_API_URL: http://paperless:8000
+      PAPERLESS_USERNAME: ${PAPERLESS_USERNAME:-admin}
+      PAPERLESS_PASSWORD: ${PAPERLESS_PASSWORD:-Admin123!}
     depends_on:
       postgres:
         condition: service_healthy
-      mayan:
+      paperless:
         condition: service_healthy
     restart: unless-stopped
 

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { MayanService } from '../mayan/mayan.service';
+import { PaperlessService } from '../paperless/paperless.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { StorageService } from '../storage/storage.service';
@@ -7,7 +7,7 @@ import { StorageService } from '../storage/storage.service';
 @Injectable()
 export class DashboardService {
   constructor(
-    private readonly mayan: MayanService,
+    private readonly paperless: PaperlessService,
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
     private readonly storage: StorageService,
@@ -16,7 +16,7 @@ export class DashboardService {
   async summary(tenantId: string) {
     const [users, docPage, storage, recentAudits] = await Promise.all([
       this.prisma.user.count({ where: { tenantId } }),
-      this.mayan.listDocuments(1, 5).catch(() => ({ count: 0, results: [] as unknown[] })),
+      this.paperless.listDocuments(1, 5).catch(() => ({ count: 0, results: [] as unknown[] })),
       this.storage.status(),
       this.prisma.auditLog.findMany({
         where: { tenantId },

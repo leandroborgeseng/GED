@@ -2,7 +2,7 @@
 # Para vários serviços no mesmo repo, em cada serviço define o path do ficheiro em Settings:
 #   API:       /apps/backend/railway.toml
 #   Web:       /apps/frontend/railway.toml
-#   Mayan:     /docker/mayan/railway.toml
+#   Paperless: /docker/paperless/railway.toml
 # Guia completo: docs/railway-setup.md
 #
 # No Railway: crie um projeto, conecte o GitHub (repo GED), adicione PostgreSQL e dois serviços a partir do mesmo repo:
@@ -14,7 +14,7 @@
 #      O Railway NÃO injeta o Postgres na API sozinho — sem isso: P1012 ao iniciar (prisma migrate deploy).
 #    - OBRIGATÓRIO: JWT_SECRET (string longa). Sem isso: erro ao subir o Nest (ConfigService JWT_SECRET).
 #    - Veja railway.env.example para um modelo de variáveis.
-#    - JWT_SECRET, CORS_ORIGIN (URL pública do frontend), MAYAN_* quando houver Mayan.
+#    - JWT_SECRET, CORS_ORIGIN (URL pública do frontend), PAPERLESS_* quando houver Paperless-ngx.
 #
 # 2) Serviço "web" (segundo serviço; configure no painel — não há segundo railway.toml na raiz):
 #    - Build: Dockerfile → apps/frontend/Dockerfile

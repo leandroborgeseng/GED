@@ -31,7 +31,7 @@ type ProcessDetail = {
   confidentiality: string;
   archivedAt?: string | null;
   movements: Movement[];
-  documents: { id: string; title: string; sha256: string; mayanDocumentId: string }[];
+  documents: { id: string; title: string; sha256: string; paperlessDocumentId: string }[];
   signatures: {
     id: string;
     status: string;
@@ -304,7 +304,7 @@ export default function ProcessoDetalhePage() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Documentos (Mayan)</CardTitle>
+              <CardTitle className="text-base">Documentos (Paperless)</CardTitle>
               <CardDescription>SHA-256 registrado na abertura do anexo</CardDescription>
             </CardHeader>
             <ul className="space-y-2 px-6 pb-6 text-sm">

@@ -47,7 +47,7 @@ export default function LoginPage() {
           <CardHeader>
             <CardTitle className="text-2xl text-white">Aurora Docs</CardTitle>
             <CardDescription className="text-neutral-200">
-              Gestão eletrônica de documentos — experiência moderna, motor Mayan EDMS.
+              Gestão eletrônica de documentos — experiência moderna, motor Paperless-ngx.
             </CardDescription>
           </CardHeader>
           <form

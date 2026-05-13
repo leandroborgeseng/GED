@@ -69,11 +69,11 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Documentos recentes</CardTitle>
-            <CardDescription>Origem: Mayan EDMS via API gateway</CardDescription>
+            <CardDescription>Origem: Paperless-ngx via API gateway</CardDescription>
           </CardHeader>
           <ul className="space-y-3">
             {(data?.recentDocuments ?? []).length === 0 && (
-              <li className="text-sm text-neutral-500">Nenhum documento ou Mayan indisponível.</li>
+              <li className="text-sm text-neutral-500">Nenhum documento ou Paperless indisponível.</li>
             )}
             {(data?.recentDocuments ?? []).map((d) => (
               <li

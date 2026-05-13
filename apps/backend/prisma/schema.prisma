@@ -325,7 +325,7 @@ model ProcessDocument {
   id               String   @id @default(cuid())
   processId        String
   title            String
-  mayanDocumentId  String
+  paperlessDocumentId String
   sha256           String
   fileName         String
   mimeType         String?

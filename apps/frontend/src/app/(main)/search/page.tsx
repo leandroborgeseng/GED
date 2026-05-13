@@ -25,7 +25,7 @@ export default function SearchPage() {
               : 'OpenSearch'}
           </CardDescription>
         </CardHeader>
-        <p className="px-6 pb-6 text-sm text-neutral-500">Integração avançada com Mayan + índice externo em roadmap.</p>
+        <p className="px-6 pb-6 text-sm text-neutral-500">Integração avançada com Paperless + índice externo em roadmap.</p>
       </Card>
     </div>
   );

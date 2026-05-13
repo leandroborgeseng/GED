@@ -107,7 +107,7 @@ export default function DocumentViewerPage() {
         <Card>
           <CardHeader>
             <CardTitle>Metadados</CardTitle>
-            <CardDescription>OCR / workflows Mayan</CardDescription>
+            <CardDescription>OCR / índice no Paperless-ngx</CardDescription>
           </CardHeader>
           <pre className="max-h-[420px] overflow-auto rounded-lg bg-neutral-900/90 p-3 text-xs text-neutral-100">
             {JSON.stringify(meta, null, 2)}

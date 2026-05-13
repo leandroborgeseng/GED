@@ -60,7 +60,7 @@ export default function NovoProcessoPage() {
       <Card>
         <CardHeader>
           <CardTitle>Dados iniciais</CardTitle>
-          <CardDescription>Após criar, anexe documentos (Mayan) e tramite pela timeline.</CardDescription>
+          <CardDescription>Após criar, anexe documentos (Paperless) e tramite pela timeline.</CardDescription>
         </CardHeader>
         <form className="space-y-4 px-6 pb-6" onSubmit={handleSubmit((d) => mutation.mutate(d))}>
           <div className="flex flex-col gap-1">

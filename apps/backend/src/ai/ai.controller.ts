@@ -25,7 +25,7 @@ export class AiController {
       title: 'Resumo (mock)',
       bullets: [
         'Integração futura com modelo de linguagem e índice vetorial.',
-        'Pipeline OCR e metadados permanecem no Mayan EDMS.',
+        'Pipeline OCR e metadados permanecem no Paperless-ngx.',
       ],
     };
   }

@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { DocumentsService } from './documents.service';
 import { DocumentsController } from './documents.controller';
-import { MayanModule } from '../mayan/mayan.module';
+import { PaperlessModule } from '../paperless/paperless.module';
 import { AuditModule } from '../audit/audit.module';
 
 @Module({
-  imports: [MayanModule, AuditModule],
+  imports: [PaperlessModule, AuditModule],
   controllers: [DocumentsController],
   providers: [DocumentsService],
 })

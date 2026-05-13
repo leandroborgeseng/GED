@@ -1,20 +1,20 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { MayanService } from '../mayan/mayan.service';
+import { PaperlessService } from '../paperless/paperless.service';
 import { AuditService } from '../audit/audit.service';
 
 @Injectable()
 export class DocumentsService {
   constructor(
-    private readonly mayan: MayanService,
+    private readonly paperless: PaperlessService,
     private readonly audit: AuditService,
   ) {}
 
   list(_tenantId: string, _userId: string, page = 1, pageSize = 25) {
-    return this.mayan.listDocuments(page, pageSize);
+    return this.paperless.listDocuments(page, pageSize);
   }
 
   async get(tenantId: string, userId: string, id: number) {
-    const doc = await this.mayan.getDocument(id);
+    const doc = await this.paperless.getDocument(id);
     await this.audit.log({
       tenantId,
       userId,
@@ -26,7 +26,7 @@ export class DocumentsService {
   }
 
   async download(tenantId: string, userId: string, id: number) {
-    const file = await this.mayan.downloadLatestFile(id);
+    const file = await this.paperless.downloadLatestFile(id);
     await this.audit.log({
       tenantId,
       userId,
@@ -40,7 +40,7 @@ export class DocumentsService {
 
   async upload(tenantId: string, userId: string, file?: Express.Multer.File) {
     if (!file) throw new BadRequestException('Arquivo obrigatório');
-    const created = await this.mayan.uploadDocument(file);
+    const created = await this.paperless.uploadDocument(file);
     await this.audit.log({
       tenantId,
       userId,
@@ -52,7 +52,7 @@ export class DocumentsService {
   }
 
   ocrStatus(tenantId: string, userId: string, id: number) {
-    return this.mayan.getOcrStatus(id).then(async (s) => {
+    return this.paperless.getOcrStatus(id).then(async (s) => {
       await this.audit.log({
         tenantId,
         userId,
@@ -65,7 +65,7 @@ export class DocumentsService {
   }
 
   workflows(tenantId: string, userId: string, id: number) {
-    return this.mayan.getWorkflows(id).then(async (w) => {
+    return this.paperless.getWorkflows(id).then(async (w) => {
       await this.audit.log({
         tenantId,
         userId,

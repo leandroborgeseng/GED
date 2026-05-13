@@ -35,7 +35,7 @@ export default function ProcessosPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Processo administrativo eletrônico</h1>
           <p className="text-sm text-neutral-500">
-            Tramitação interna; documentos no Mayan EDMS; metadados e auditoria na plataforma.
+            Tramitação interna; documentos no Paperless-ngx; metadados e auditoria na plataforma.
           </p>
         </div>
         <Link href="/processos/novo">

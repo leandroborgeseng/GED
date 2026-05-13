@@ -23,7 +23,7 @@ async function bootstrap() {
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('GED Platform API')
-    .setDescription('Gateway REST sobre Mayan EDMS — multiempresa, RBAC, auditoria.')
+    .setDescription('Gateway REST sobre Paperless-ngx — multiempresa, RBAC, auditoria.')
     .setVersion('1.0')
     .addBearerAuth()
     .build();

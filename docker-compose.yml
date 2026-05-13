@@ -1,6 +1,6 @@
 # Desenvolvimento local: API + Web + Postgres.
-# Stack completa (GED + Mayan): use docker-compose.homologacao.yml + docker/homolog.env
-# Documentação Mayan: https://docs.mayan-edms.com/chapters/docker/install_docker_compose.html
+# Stack completa (GED + Paperless-ngx): `docker-compose.homologacao.yml` + `docker/homolog.env`
+# Paperless: https://docs.paperless-ngx.com/
 
 services:
   postgres:
@@ -30,10 +30,10 @@ services:
       DATABASE_URL: postgresql://ged:ged@postgres:5432/ged?schema=public
       JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-change-in-prod}
       CORS_ORIGIN: http://localhost:3000
-      MAYAN_API_URL: ${MAYAN_API_URL:-http://host.docker.internal:8000/api/v4}
-      MAYAN_USERNAME: ${MAYAN_USERNAME:-}
-      MAYAN_PASSWORD: ${MAYAN_PASSWORD:-}
-      MAYAN_DOCUMENT_TYPE_ID: ${MAYAN_DOCUMENT_TYPE_ID:-}
+      PAPERLESS_API_URL: ${PAPERLESS_API_URL:-http://host.docker.internal:8010}
+      PAPERLESS_USERNAME: ${PAPERLESS_USERNAME:-}
+      PAPERLESS_PASSWORD: ${PAPERLESS_PASSWORD:-}
+      PAPERLESS_TOKEN: ${PAPERLESS_TOKEN:-}
     depends_on:
       postgres:
         condition: service_healthy

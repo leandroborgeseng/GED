@@ -1,0 +1,5 @@
+# Serviço Paperless-ngx na Railway → Settings → Config-as-code: /docker/paperless/railway.toml
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "docker/paperless/Dockerfile"
+watchPatterns = ["/docker/paperless/**"]

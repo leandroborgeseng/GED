@@ -16,7 +16,7 @@ import {
 } from '@prisma/client';
 import * as crypto from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
-import { MayanService } from '../../mayan/mayan.service';
+import { PaperlessService } from '../../paperless/paperless.service';
 import type { AuthUser } from '../../common/decorators/current-user.decorator';
 import { buildA1SignaturePayload, verifyA1DetachedSignature } from '../lib/a1-signature';
 
@@ -24,7 +24,7 @@ import { buildA1SignaturePayload, verifyA1DetachedSignature } from '../lib/a1-si
 export class ProcessesService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly mayan: MayanService,
+    private readonly paperless: PaperlessService,
   ) {}
 
   private async nextProcessNumber(tenantId: string) {
@@ -620,14 +620,14 @@ export class ProcessesService {
   async anexarDocumento(user: AuthUser, processId: string, file: Express.Multer.File, title: string) {
     const process = await this.getOne(user, processId);
     const sha256 = crypto.createHash('sha256').update(file.buffer).digest('hex');
-    const mayan = (await this.mayan.uploadDocument(file)) as { id?: number };
-    const mayanId = String(mayan?.id ?? '');
-    if (!mayanId) throw new BadRequestException('Upload Mayan não retornou id.');
+    const uploaded = await this.paperless.uploadDocument(file);
+    const paperlessId = String(uploaded?.id ?? '');
+    if (!paperlessId) throw new BadRequestException('Upload Paperless não retornou id.');
     const doc = await this.prisma.processDocument.create({
       data: {
         processId,
         title,
-        mayanDocumentId: mayanId,
+        paperlessDocumentId: paperlessId,
         sha256,
         fileName: file.originalname,
         mimeType: file.mimetype,

@@ -5,12 +5,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Card, CardHeader, CardTitle, CardDescription, Button } from '@ged/ui';
 import { apiFetch } from '@/lib/api';
-import type { MayanDocumentListItem } from '@ged/types';
+import type { PaperlessDocumentListItem } from '@ged/types';
 import { useAuthStore } from '@/stores/auth-store';
 import Link from 'next/link';
 import { Grid, List, Upload } from 'lucide-react';
 
-type ListResponse = { count: number; results: MayanDocumentListItem[] };
+type ListResponse = { count: number; results: PaperlessDocumentListItem[] };
 
 export default function DocumentsPage() {
   const accessToken = useAuthStore((s) => s.accessToken);
@@ -38,7 +38,7 @@ export default function DocumentsPage() {
       return res.json();
     },
     onSuccess: () => {
-      toast.success('Upload enviado ao Mayan via gateway');
+      toast.success('Upload enviado ao Paperless-ngx via gateway');
       void qc.invalidateQueries({ queryKey: ['documents'] });
     },
     onError: (e: Error) => toast.error(e.message),

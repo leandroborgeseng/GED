@@ -5,10 +5,10 @@ import { PaeStructureController } from './structure/pae-structure.controller';
 import { ProcessTypesController } from './process-types/process-types.controller';
 import { DocumentTemplatesController } from './templates/document-templates.controller';
 import { PaeFunctionalRolesController } from './functional-roles/pae-functional-roles.controller';
-import { MayanModule } from '../mayan/mayan.module';
+import { PaperlessModule } from '../paperless/paperless.module';
 
 @Module({
-  imports: [MayanModule],
+  imports: [PaperlessModule],
   controllers: [
     ProcessesController,
     PaeStructureController,

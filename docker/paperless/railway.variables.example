@@ -1,0 +1,18 @@
+# Variáveis do serviço Paperless-ngx na Railway (substitui <...> ou usa Reference Variables).
+# Cria antes: Postgres (base paperless), Redis (broker). Liga os hosts privados do painel.
+
+PAPERLESS_REDIS=redis://default:<REDIS_PASSWORD>@<REDIS_HOST>:6379
+PAPERLESS_DBHOST=<PG_HOST>
+PAPERLESS_DBNAME=railway
+PAPERLESS_DBUSER=postgres
+PAPERLESS_DBPASS=<PG_PASSWORD>
+PAPERLESS_SECRET_KEY=<gere-uma-string-longa-aleatoria>
+PAPERLESS_URL=https://<dominio-publico-paperless>
+PAPERLESS_TIME_ZONE=America/Sao_Paulo
+PAPERLESS_OCR_LANGUAGE=por
+PAPERLESS_ADMIN_USER=admin
+PAPERLESS_ADMIN_MAIL=admin@example.com
+PAPERLESS_ADMIN_PASSWORD=<senha-forte>
+
+# Railway injeta PORT; a imagem costuma respeitar quando exposta. Se o deploy falhar na porta,
+# confira a documentação atual do Paperless-ngx para variável de porta do webserver.

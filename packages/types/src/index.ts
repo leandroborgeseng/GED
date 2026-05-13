@@ -20,7 +20,7 @@ export type LoginResponse = {
   user: AuthUserDto;
 };
 
-export type MayanDocumentListItem = {
+export type PaperlessDocumentListItem = {
   id: number;
   label?: string;
   description?: string;
@@ -31,7 +31,7 @@ export type MayanDocumentListItem = {
 
 export type DashboardSummary = {
   documentCount: number;
-  recentDocuments: MayanDocumentListItem[];
+  recentDocuments: PaperlessDocumentListItem[];
   userCount: number;
   storage: { configured: boolean; bucketOk?: boolean };
   recentActivity: unknown[];
