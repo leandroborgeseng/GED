@@ -41,7 +41,8 @@ Objetivo: **três serviços a partir do mesmo repo** — `Paperless`, `GED-API`,
 ### 3) Serviço **GED-Web**
 
 1. **Config file:** `/apps/frontend/railway.toml`  
-2. **Build args / env:** `NEXT_PUBLIC_API_URL=https://<domínio-da-api>/api` (URL pública da API GED).
+2. **Build args / env:** `NEXT_PUBLIC_API_URL=https://<domínio-da-api>/api` (URL pública da API GED). **Tem de ser definida antes do build** (variável de build no Railway); se faltar, o login no browser chama `localhost` e aparece *Load failed* / *Sem ligação à API*.  
+3. **CORS na API:** `CORS_ORIGIN` deve incluir o URL **exato** do frontend (ex. `https://<domínio-web>.up.railway.app`), sem barra final extra. Frontend HTTPS + API só em HTTP = bloqueio misto no login.
 
 ### Ordem sugerida de deploy
 

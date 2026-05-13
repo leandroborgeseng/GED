@@ -10,7 +10,23 @@ export async function apiFetch<T>(
     if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
   }
   if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`);
-  const res = await fetch(`${base}${path}`, { ...rest, headers });
+  const url = `${base}${path.startsWith('/') ? path : `/${path}`}`;
+  let res: Response;
+  try {
+    res = await fetch(url, { ...rest, headers });
+  } catch (e) {
+    const mixed =
+      typeof window !== 'undefined' &&
+      window.location.protocol === 'https:' &&
+      base.startsWith('http:');
+    const hint = mixed
+      ? ' A página está em HTTPS e a API em HTTP — o navegador bloqueia. Usa HTTPS na URL da API.'
+      : '';
+    const detail = e instanceof Error ? e.message : String(e);
+    throw new Error(
+      `Sem ligação à API (${base}).${hint} Verifica NEXT_PUBLIC_API_URL no build do Railway (URL pública da API, com /api), se o serviço da API está online e CORS_ORIGIN na API com o domínio deste site. (${detail})`,
+    );
+  }
   if (!res.ok) {
     let msg = res.statusText;
     try {
