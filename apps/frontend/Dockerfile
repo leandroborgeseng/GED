@@ -5,7 +5,8 @@ COPY package.json package-lock.json* ./
 COPY apps/frontend/package.json apps/frontend/
 COPY packages/types/package.json packages/types/
 COPY packages/ui/package.json packages/ui/
-RUN npm ci --workspace=frontend --workspaces --if-present
+# Evita "prepare": "husky" na raiz (husky não faz parte do install filtrado por workspace no CI).
+RUN npm ci --workspace=frontend --workspaces --if-present --ignore-scripts
 
 FROM node:22-bookworm-slim AS builder
 WORKDIR /repo
