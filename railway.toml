@@ -1,7 +1,19 @@
-# https://docs.railway.com/reference/config-as-code
-# Crie dois serviços no mesmo projeto apontando para este repositório:
-# 1) Backend: Dockerfile apps/backend/Dockerfile — variáveis DATABASE_URL, JWT_SECRET, MAYAN_* (URL interna Railway do Mayan)
-# 2) Frontend: Dockerfile apps/frontend/Dockerfile — NEXT_PUBLIC_API_URL=https://SEU-BACKEND.up.railway.app/api
+# Config-as-code para o serviço da API neste monorepo.
+# O build usa a raiz do repositório como contexto Docker e o Dockerfile em apps/backend.
+#
+# No Railway: crie um projeto, conecte o GitHub (repo GED), adicione PostgreSQL e dois serviços a partir do mesmo repo:
+#
+# 1) Serviço "api" (este arquivo costuma ser detectado na raiz; se não, configure manualmente):
+#    - Build: Dockerfile → apps/backend/Dockerfile
+#    - Root directory: vazio (raiz do repo), para o contexto do Docker incluir apps/backend/
+#    - Variáveis: DATABASE_URL (referência ao plugin Postgres), JWT_SECRET, CORS_ORIGIN (URL pública do frontend),
+#      MAYAN_API_URL, MAYAN_USERNAME, MAYAN_PASSWORD, MAYAN_DOCUMENT_TYPE_ID (opcional até integrar Mayan)
+#
+# 2) Serviço "web" (segundo serviço; configure no painel — não há segundo railway.toml na raiz):
+#    - Build: Dockerfile → apps/frontend/Dockerfile
+#    - Root directory: raiz do repo
+#    - Build variável / arg: NEXT_PUBLIC_API_URL=https://<sua-api>.up.railway.app/api
+#    - Após o deploy da API, copie a URL pública e defina NEXT_PUBLIC_API_URL antes do build do frontend.
 
 [build]
 builder = "DOCKERFILE"

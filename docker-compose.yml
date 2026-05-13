@@ -22,8 +22,8 @@ services:
 
   api:
     build:
-      context: ./apps/backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/backend/Dockerfile
     ports:
       - '4000:4000'
     environment:

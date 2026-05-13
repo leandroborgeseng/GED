@@ -59,6 +59,31 @@ docker compose up --build
 
 Defina `JWT_SECRET` e, se usar Mayan, `MAYAN_API_URL`, `MAYAN_USERNAME`, `MAYAN_PASSWORD`, `MAYAN_DOCUMENT_TYPE_ID`.
 
+## Publicar no Railway (GitHub → deploy)
+
+1. **Suba o código no GitHub** (branch `main`):
+
+   ```bash
+   git add -A && git commit -m "sua mensagem" && git push origin main
+   ```
+
+2. No [Railway](https://railway.app): **New Project** → **Deploy from GitHub** → selecione o repositório **GED**.
+
+3. **PostgreSQL**: adicione o plugin **Database** → **PostgreSQL**. Copie a variável `DATABASE_URL` (ou use a referência de serviço que o Railway oferece).
+
+4. **Serviço API (Nest)**  
+   - Fonte: mesmo repo. **Root directory**: deixe em branco (raiz).  
+   - **Dockerfile**: `apps/backend/Dockerfile` (o `railway.toml` na raiz já aponta para ele).  
+   - Variáveis de ambiente: `DATABASE_URL`, `JWT_SECRET` (obrigatório em produção), `CORS_ORIGIN` (URL pública do frontend, ex. `https://seu-frontend.up.railway.app`), e `MAYAN_*` quando o Mayan estiver disponível.  
+   - Gere um domínio público para a API e anote a URL base (ex. `https://ged-api-production.up.railway.app`).
+
+5. **Serviço Web (Next)** — **novo serviço** no mesmo projeto, mesmo repositório:  
+   - **Dockerfile**: `apps/frontend/Dockerfile`.  
+   - **Build argument / variável** (importante no build): `NEXT_PUBLIC_API_URL=https://<URL-da-sua-API>/api` (use a URL real do passo 4). Sem isso, o browser chama a API errada.  
+   - Defina também `NEXT_PUBLIC_API_URL` como variável de ambiente em runtime se o Railway propagar para o container do Next standalone.
+
+6. Faça **Redeploy** do frontend após mudar a URL da API, para recompilar com o `NEXT_PUBLIC_*` correto.
+
 ## Documentação adicional
 
 - Planejamento futuro (editor rich / PDF): [`docs/planejamento-editor-rico-despacho-pdf.md`](docs/planejamento-editor-rico-despacho-pdf.md)
