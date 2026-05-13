@@ -5,12 +5,7 @@ COPY package.json package-lock.json* ./
 COPY apps/frontend/package.json apps/frontend/
 COPY packages/types/package.json packages/types/
 COPY packages/ui/package.json packages/ui/
-# Optional deps nativas (Linux) + lockfile único na raiz — evita npm #4828 com apps/frontend/package-lock.json.
-RUN npm ci --workspace=frontend --workspaces --if-present && \
-  LCSS_VER=$(node -p "require('./apps/frontend/node_modules/lightningcss/package.json').version") && \
-  npm install -w frontend "lightningcss-linux-x64-gnu@${LCSS_VER}" --no-save && \
-  OX_VER=$(node -p "require('./apps/frontend/node_modules/@tailwindcss/oxide/package.json').version") && \
-  npm install -w frontend "@tailwindcss/oxide-linux-x64-gnu@${OX_VER}" --no-save
+RUN npm ci --workspace=frontend --workspaces --if-present
 
 FROM node:22-bookworm-slim AS builder
 WORKDIR /repo
