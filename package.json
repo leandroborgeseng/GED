@@ -7,7 +7,7 @@
     "build": "npm run build -w backend && npm run build -w frontend",
     "lint": "npm run lint --workspaces --if-present",
     "format": "prettier -w \"**/*.{ts,tsx,js,json,css,md}\"",
-    "prepare": "husky"
+    "prepare": "node -e \"const fs=require('fs');if(!fs.existsSync('node_modules/husky'))process.exit(0);require('child_process').execSync('npx husky',{stdio:'inherit'})\""
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
