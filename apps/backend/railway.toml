@@ -1,0 +1,11 @@
+# Serviço: API Nest (GED). No painel Railway → Settings → Config-as-code path: /apps/backend/railway.toml
+# Contexto Docker: raiz do monorepo. Root directory do serviço: vazio (repo inteiro).
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "apps/backend/Dockerfile"
+watchPatterns = ["/apps/backend/**", "/packages/types/**"]
+
+[deploy]
+healthcheckPath = "/api/health"
+restartPolicyType = "ON_FAILURE"

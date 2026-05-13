@@ -1,5 +1,9 @@
-# Config-as-code para o serviço da API neste monorepo.
-# O build usa a raiz do repositório como contexto Docker e o Dockerfile em apps/backend.
+# Config-as-code na raiz = mesmo conteúdo que a API (compatibilidade).
+# Para vários serviços no mesmo repo, em cada serviço define o path do ficheiro em Settings:
+#   API:       /apps/backend/railway.toml
+#   Web:       /apps/frontend/railway.toml
+#   Mayan:     /docker/mayan/railway.toml
+# Guia completo: docs/railway-setup.md
 #
 # No Railway: crie um projeto, conecte o GitHub (repo GED), adicione PostgreSQL e dois serviços a partir do mesmo repo:
 #

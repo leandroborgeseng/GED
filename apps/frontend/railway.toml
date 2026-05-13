@@ -1,0 +1,12 @@
+# Serviço: Web Next.js. No painel Railway → Settings → Config-as-code path: /apps/frontend/railway.toml
+# Contexto Docker: raiz do monorepo. Root directory do serviço: vazio.
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "apps/frontend/Dockerfile"
+watchPatterns = ["/apps/frontend/**", "/packages/ui/**", "/packages/types/**"]
+
+[deploy]
+healthcheckPath = "/"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"

@@ -1,0 +1,12 @@
+# Serviço: Mayan EDMS. No painel Railway → Settings → Config-as-code path: /docker/mayan/railway.toml
+# Contexto Docker: raiz do monorepo. Root directory do serviço: vazio.
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "docker/mayan/Dockerfile"
+watchPatterns = ["/docker/mayan/**"]
+
+[deploy]
+healthcheckPath = "/"
+healthcheckTimeout = 300
+restartPolicyType = "ON_FAILURE"

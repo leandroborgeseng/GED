@@ -90,6 +90,8 @@ Credenciais e segredos em `docker/homolog.env` são **só para homologação**; 
 
 ## Publicar no Railway (GitHub → deploy)
 
+Guia detalhado (vários serviços, `railway.toml` por app, limitações do Mayan): **[`docs/railway-setup.md`](docs/railway-setup.md)**.
+
 1. **Suba o código no GitHub** (branch `main`):
 
    ```bash
@@ -127,4 +129,5 @@ Credenciais e segredos em `docker/homolog.env` são **só para homologação**; 
 
 ## Documentação adicional
 
+- Railway (API + Web + Mayan): [`docs/railway-setup.md`](docs/railway-setup.md)
 - Planejamento futuro (editor rich / PDF): [`docs/planejamento-editor-rico-despacho-pdf.md`](docs/planejamento-editor-rico-despacho-pdf.md)
