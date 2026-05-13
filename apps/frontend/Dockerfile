@@ -5,8 +5,8 @@ COPY package.json package-lock.json* ./
 COPY apps/frontend/package.json apps/frontend/
 COPY packages/types/package.json packages/types/
 COPY packages/ui/package.json packages/ui/
-# Evita "prepare": "husky" na raiz (husky não faz parte do install filtrado por workspace no CI).
-RUN npm ci --workspace=frontend --workspaces --if-present --ignore-scripts
+# O prepare na raiz só corre Husky se existir node_modules/husky (ver package.json na raiz).
+RUN npm ci --workspace=frontend --workspaces --if-present
 
 FROM node:22-bookworm-slim AS builder
 WORKDIR /repo
