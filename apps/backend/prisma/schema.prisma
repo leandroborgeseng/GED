@@ -1,0 +1,437 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// RBAC da plataforma (JWT / guards)
+enum SystemRole {
+  ADMIN
+  MANAGER
+  USER
+  VIEWER
+}
+
+/// Situação do processo administrativo
+enum ProcessStatus {
+  RASCUNHO
+  ABERTO
+  EM_TRAMITACAO
+  AGUARDANDO_RECEBIMENTO
+  AGUARDANDO_ASSINATURA
+  DEVOLVIDO_COMPLEMENTACAO
+  CONCLUIDO
+  ARQUIVADO
+}
+
+enum ProcessMovementKind {
+  ABERTURA
+  TRAMITACAO
+  DESPACHO
+  CIENCIA
+  DEVOLUCAO_COMPLEMENTACAO
+  SOLICITACAO_ASSINATURA
+  ASSINATURA_REGISTRADA
+  ARQUIVAMENTO
+  DESARQUIVAMENTO
+  ANEXO
+  COMENTARIO_SISTEMA
+}
+
+enum ConfidentialityLevel {
+  PUBLICO
+  RESTRITO
+  SIGILOSO
+}
+
+enum ProcessSignatureMethod {
+  SIMPLES
+  ICP_BRASIL
+}
+
+enum ProcessSignatureStatus {
+  PENDENTE
+  ASSINADO
+  RECUSADO
+}
+
+/// Política de assinatura do usuário (A1 = certificado ICP-Brasil em arquivo/token)
+enum UserSignaturePolicy {
+  SIMPLES
+  ICP_A1
+}
+
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users                 User[]
+  auditLogs             AuditLog[]
+  organizations       Organization[]
+  roles                 Role[]
+  processTypes          ProcessType[]
+  documentTemplates     DocumentTemplate[]
+  processCounters       ProcessNumberCounter[]
+  processes             Process[]
+  internalNotifications InternalNotification[]
+}
+
+/// Secretaria / órgão (multiempresa lógica)
+model Organization {
+  id        String   @id @default(cuid())
+  tenantId  String
+  name      String
+  code      String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  departments Department[]
+  users       User[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+}
+
+/// Departamento vinculado à secretaria
+model Department {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  code           String
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  units        Unit[]
+  users        User[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+}
+
+/// Setor / unidade de tramitação
+model Unit {
+  id           String   @id @default(cuid())
+  departmentId String
+  name         String
+  code         String
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  department Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  users      User[]
+  processesCurrent Process[]       @relation("ProcessCurrentUnit")
+  movementsFrom    ProcessMovement[] @relation("MovementFrom")
+  movementsTo      ProcessMovement[] @relation("MovementTo")
+
+  @@unique([departmentId, code])
+  @@index([departmentId])
+}
+
+/// Função administrativa (ex.: protocolista, diretor) — permissões declarativas em JSON
+model Role {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  slug        String
+  description String?
+  permissions Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  users  User[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+}
+
+model User {
+  id             String     @id @default(cuid())
+  email          String     @unique
+  passwordHash   String
+  name           String
+  systemRole     SystemRole @default(USER)
+  tenantId       String
+  organizationId String?
+  departmentId   String?
+  unitId         String?
+  roleId         String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  resetToken     String?
+  resetExpires   DateTime?
+  signaturePolicy UserSignaturePolicy @default(SIMPLES)
+
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  department   Department?   @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  unit         Unit?         @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  paeRole      Role?         @relation(fields: [roleId], references: [id], onDelete: SetNull)
+
+  refreshTokens        RefreshToken[]
+  auditLogs            AuditLog[]
+  processesOpened      Process[]            @relation("ProcessOpenedBy")
+  movements            ProcessMovement[]
+  comments             ProcessComment[]
+  signatures           ProcessSignature[]
+  notifications        InternalNotification[]
+  processAuditLogs       ProcessAuditLog[]
+  processDocumentsCreated ProcessDocument[] @relation("ProcessDocumentAuthor")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  tenantId   String
+  userId     String?
+  action     String
+  resource   String
+  resourceId String?
+  metadata   Json?
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, createdAt])
+}
+
+model ProcessNumberCounter {
+  id        String @id @default(cuid())
+  tenantId  String
+  year      Int
+  prefix    String @default("PAE")
+  lastValue Int    @default(0)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, year, prefix])
+}
+
+model ProcessType {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  code        String
+  description String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant   Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  steps    ProcessStep[]
+  processes Process[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+}
+
+model ProcessStep {
+  id            String   @id @default(cuid())
+  processTypeId String
+  order         Int
+  name          String
+  description   String?
+  defaultUnitId String?
+  createdAt     DateTime @default(now())
+
+  processType ProcessType @relation(fields: [processTypeId], references: [id], onDelete: Cascade)
+
+  @@index([processTypeId])
+}
+
+model Process {
+  id                 String               @id @default(cuid())
+  tenantId           String
+  tenant             Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  processTypeId      String
+  number             String
+  year               Int
+  subject            String
+  interestedParty    String?
+  status             ProcessStatus        @default(ABERTO)
+  confidentiality    ConfidentialityLevel @default(PUBLICO)
+  currentUnitId      String?
+  openedById         String
+  archivedAt         DateTime?
+  archiveReason      String?
+  supplementNote     String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  processType ProcessType @relation(fields: [processTypeId], references: [id])
+  currentUnit Unit?       @relation("ProcessCurrentUnit", fields: [currentUnitId], references: [id])
+  openedBy    User        @relation("ProcessOpenedBy", fields: [openedById], references: [id])
+
+  movements   ProcessMovement[]
+  documents   ProcessDocument[]
+  signatures  ProcessSignature[]
+  comments    ProcessComment[]
+  deadlines   ProcessDeadline[]
+  auditLogs   ProcessAuditLog[]
+
+  @@unique([tenantId, year, number])
+  @@index([tenantId, status])
+  @@index([currentUnitId])
+  @@index([interestedParty])
+}
+
+model ProcessMovement {
+  id             String               @id @default(cuid())
+  processId      String
+  fromUnitId     String?
+  toUnitId       String?
+  kind           ProcessMovementKind
+  summary        String?
+  dispatchText   String?
+  createdById    String
+  acknowledgedAt DateTime?
+  createdAt      DateTime             @default(now())
+  metadata       Json?
+
+  process   Process @relation(fields: [processId], references: [id], onDelete: Cascade)
+  fromUnit  Unit?   @relation("MovementFrom", fields: [fromUnitId], references: [id])
+  toUnit    Unit?   @relation("MovementTo", fields: [toUnitId], references: [id])
+  createdBy User    @relation(fields: [createdById], references: [id])
+
+  @@index([processId, createdAt])
+  @@index([toUnitId, acknowledgedAt])
+}
+
+model ProcessDocument {
+  id               String   @id @default(cuid())
+  processId        String
+  title            String
+  mayanDocumentId  String
+  sha256           String
+  fileName         String
+  mimeType         String?
+  bytes            Int?
+  sortOrder        Int      @default(0)
+  createdById      String
+  createdAt        DateTime @default(now())
+
+  process     Process            @relation(fields: [processId], references: [id], onDelete: Cascade)
+  createdBy   User               @relation("ProcessDocumentAuthor", fields: [createdById], references: [id])
+  signatures  ProcessSignature[]
+
+  @@index([processId])
+}
+
+model ProcessSignature {
+  id                String                 @id @default(cuid())
+  processId         String
+  processDocumentId String?
+  userId            String
+  status            ProcessSignatureStatus @default(PENDENTE)
+  method            ProcessSignatureMethod @default(SIMPLES)
+  /// Payload com metadados da assinatura simples ou placeholders ICP-Brasil
+  proof             Json?
+  icpCertificateRef String?
+  signedAt          DateTime?
+  createdAt         DateTime               @default(now())
+
+  process         Process          @relation(fields: [processId], references: [id], onDelete: Cascade)
+  processDocument ProcessDocument? @relation(fields: [processDocumentId], references: [id])
+  user            User             @relation(fields: [userId], references: [id])
+
+  @@index([processId])
+  @@index([userId, status])
+}
+
+model ProcessComment {
+  id        String   @id @default(cuid())
+  processId String
+  userId    String
+  body      String
+  createdAt DateTime @default(now())
+
+  process Process @relation(fields: [processId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@index([processId])
+}
+
+model ProcessDeadline {
+  id          String    @id @default(cuid())
+  processId   String
+  label       String
+  dueAt       DateTime
+  fulfilledAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  process Process @relation(fields: [processId], references: [id], onDelete: Cascade)
+
+  @@index([processId, dueAt])
+}
+
+model ProcessAuditLog {
+  id         String   @id @default(cuid())
+  processId  String
+  userId     String?
+  action     String
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  process Process @relation(fields: [processId], references: [id], onDelete: Cascade)
+  user    User?   @relation(fields: [userId], references: [id])
+
+  @@index([processId, createdAt])
+}
+
+model DocumentTemplate {
+  id         String   @id @default(cuid())
+  tenantId   String
+  name       String
+  code       String
+  body       String   @db.Text
+  variables  Json?
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, code])
+  @@index([tenantId])
+}
+
+model InternalNotification {
+  id        String    @id @default(cuid())
+  tenantId  String
+  userId    String
+  title     String
+  body      String?
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@index([tenantId])
+}

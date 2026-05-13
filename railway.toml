@@ -1,0 +1,12 @@
+# https://docs.railway.com/reference/config-as-code
+# Crie dois serviços no mesmo projeto apontando para este repositório:
+# 1) Backend: Dockerfile apps/backend/Dockerfile — variáveis DATABASE_URL, JWT_SECRET, MAYAN_* (URL interna Railway do Mayan)
+# 2) Frontend: Dockerfile apps/frontend/Dockerfile — NEXT_PUBLIC_API_URL=https://SEU-BACKEND.up.railway.app/api
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "apps/backend/Dockerfile"
+
+[deploy]
+healthcheckPath = "/api/health"
+restartPolicyType = "ON_FAILURE"

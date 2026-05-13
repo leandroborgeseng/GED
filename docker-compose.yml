@@ -1,0 +1,57 @@
+# Desenvolvimento local: API + Web + Postgres.
+# Mayan EDMS: use o compose oficial (PostgreSQL + Redis + RabbitMQ + app) em paralelo
+# e defina MAYAN_API_URL=http://host.docker.internal:PORTA/api/v4 (Mac/Win) ou o hostname do serviço Mayan na mesma rede Docker.
+# Documentação: https://docs.mayan-edms.com/chapters/docker/install_docker_compose.html
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ged
+      POSTGRES_PASSWORD: ged
+      POSTGRES_DB: ged
+    ports:
+      - '5432:5432'
+    volumes:
+      - ged_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ged -d ged']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+    ports:
+      - '4000:4000'
+    environment:
+      PORT: '4000'
+      DATABASE_URL: postgresql://ged:ged@postgres:5432/ged?schema=public
+      JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-change-in-prod}
+      CORS_ORIGIN: http://localhost:3000
+      MAYAN_API_URL: ${MAYAN_API_URL:-http://host.docker.internal:8000/api/v4}
+      MAYAN_USERNAME: ${MAYAN_USERNAME:-}
+      MAYAN_PASSWORD: ${MAYAN_PASSWORD:-}
+      MAYAN_DOCUMENT_TYPE_ID: ${MAYAN_DOCUMENT_TYPE_ID:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000/api}
+    ports:
+      - '3000:3000'
+    environment:
+      PORT: '3000'
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000/api}
+    depends_on:
+      - api
+
+volumes:
+  ged_pg:
