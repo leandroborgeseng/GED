@@ -28,6 +28,7 @@ COPY --from=builder --chown=nextjs:nodejs /repo/apps/frontend/.next/standalone .
 COPY --from=builder --chown=nextjs:nodejs /repo/apps/frontend/.next/static ./apps/frontend/.next/static
 USER nextjs
 EXPOSE 3000
+# Em runtime o Railway define PORT (ex.: 8080); o Next usa process.env.PORT.
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 CMD ["node", "apps/frontend/server.js"]

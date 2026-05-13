@@ -106,7 +106,7 @@ Credenciais e segredos em `docker/homolog.env` são **só para homologação**; 
    - **Variables (crítico):** no serviço da API, crie **`DATABASE_URL`** com **Reference Variable** apontando para o Postgres do projeto, por exemplo `${{ Postgres.DATABASE_URL }}` (troque `Postgres` pelo **nome exato** do serviço de banco no painel). Sem isso o container falha com **P1012** ao rodar `prisma migrate deploy`.  
    - Crie também **`JWT_SECRET`** (string longa e aleatória; sem ela a API cai com *Configuration key JWT_SECRET does not exist*).  
    - Veja também o ficheiro [`railway.env.example`](railway.env.example) para colar no RAW Editor (ajustando o nome do serviço Postgres).  
-   - Outras variáveis: `JWT_SECRET` (obrigatório em produção), `CORS_ORIGIN` (URL pública do frontend), e `MAYAN_*` quando o Mayan estiver disponível.  
+   - Outras variáveis: `CORS_ORIGIN` (URL pública do frontend), e `MAYAN_*` quando o Mayan estiver disponível.  
    - Gere um domínio público para a API e anote a URL base (ex. `https://ged-api-production.up.railway.app`).
 
 5. **Serviço Web (Next)** — **novo serviço** no mesmo projeto, mesmo repositório:  
@@ -115,6 +115,12 @@ Credenciais e segredos em `docker/homolog.env` são **só para homologação**; 
    - Defina também `NEXT_PUBLIC_API_URL` como variável de ambiente em runtime se o Railway propagar para o container do Next standalone.
 
 6. Faça **Redeploy** do frontend após mudar a URL da API, para recompilar com o `NEXT_PUBLIC_*` correto.
+
+### 502 ou “porta 3000” na Railway
+
+- **Não coloques `:3000` nem `:4000` no URL público** (`https://….up.railway.app`). O acesso é sempre por **HTTPS na porta 443**; o Railway encaminha para a porta interna que define em `PORT` (nos logs da API costuma aparecer como `8080` dentro do contentor). `https://teu-dominio.up.railway.app:3000` **não** aponta para a app e costuma resultar em **502** ou falha de ligação.
+- O serviço cujo deploy mostra **Nest** (rotas `/api/...`) é só a **API**. A **interface (Next.js)** é outro serviço, com outro domínio gerado na Railway — abre esse URL **sem** sufixo de porta.
+- Para testar a API: `https://<domínio-da-api>/` (JSON de ajuda) ou `https://<domínio-da-api>/api/health`.
 
 **Railway e stack com Mayan:** o Railway não aplica um `docker-compose` inteiro como um único deploy com vários serviços. Para **um ambiente já igual ao compose** (GED + Mayan), o caminho mais simples é uma **VM ou host com Docker** rodando o comando da secção **Docker homologação (GED + Mayan, um comando)** acima. Na Railway, replique **serviços separados** (Postgres GED, Postgres/Redis/Rabbit/Mayan, API GED, Web GED) e as mesmas variáveis de `docker/homolog.env`, com `MAYAN_API_URL` apontando para a URL **interna ou pública** do serviço Mayan.
 
