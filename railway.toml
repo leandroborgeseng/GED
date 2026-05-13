@@ -6,8 +6,10 @@
 # 1) Serviço "api" (este arquivo costuma ser detectado na raiz; se não, configure manualmente):
 #    - Build: Dockerfile → apps/backend/Dockerfile
 #    - Root directory: vazio (raiz do repo), para o contexto do Docker incluir apps/backend/
-#    - Variáveis: DATABASE_URL (referência ao plugin Postgres), JWT_SECRET, CORS_ORIGIN (URL pública do frontend),
-#      MAYAN_API_URL, MAYAN_USERNAME, MAYAN_PASSWORD, MAYAN_DOCUMENT_TYPE_ID (opcional até integrar Mayan)
+#    - OBRIGATÓRIO no serviço da API: DATABASE_URL=${{ NomeDoPostgres.DATABASE_URL }} (Reference Variable).
+#      O Railway NÃO injeta o Postgres na API sozinho — sem isso: P1012 ao iniciar (prisma migrate deploy).
+#    - Veja railway.env.example para um modelo de variáveis.
+#    - JWT_SECRET, CORS_ORIGIN (URL pública do frontend), MAYAN_* quando houver Mayan.
 #
 # 2) Serviço "web" (segundo serviço; configure no painel — não há segundo railway.toml na raiz):
 #    - Build: Dockerfile → apps/frontend/Dockerfile

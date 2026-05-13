@@ -98,12 +98,14 @@ Credenciais e segredos em `docker/homolog.env` são **só para homologação**; 
 
 2. No [Railway](https://railway.app): **New Project** → **Deploy from GitHub** → selecione o repositório **GED**.
 
-3. **PostgreSQL**: adicione o plugin **Database** → **PostgreSQL**. Copie a variável `DATABASE_URL` (ou use a referência de serviço que o Railway oferece).
+3. **PostgreSQL**: adicione o plugin **Database** → **PostgreSQL** (deixe o serviço com um nome fácil de referenciar, ex. `Postgres`).
 
-4. **Serviço API (Nest)**  
+4. **Serviço API (Nest)** — **obrigatório ligar o banco**  
    - Fonte: mesmo repo. **Root directory**: deixe em branco (raiz).  
    - **Dockerfile**: `apps/backend/Dockerfile` (o `railway.toml` na raiz já aponta para ele).  
-   - Variáveis de ambiente: `DATABASE_URL`, `JWT_SECRET` (obrigatório em produção), `CORS_ORIGIN` (URL pública do frontend, ex. `https://seu-frontend.up.railway.app`), e `MAYAN_*` quando o Mayan estiver disponível.  
+   - **Variables (crítico):** no serviço da API, crie **`DATABASE_URL`** com **Reference Variable** apontando para o Postgres do projeto, por exemplo `${{ Postgres.DATABASE_URL }}` (troque `Postgres` pelo **nome exato** do serviço de banco no painel). Sem isso o container falha com **P1012** ao rodar `prisma migrate deploy`.  
+   - Veja também o ficheiro [`railway.env.example`](railway.env.example) para colar no RAW Editor (ajustando o nome do serviço Postgres).  
+   - Outras variáveis: `JWT_SECRET` (obrigatório em produção), `CORS_ORIGIN` (URL pública do frontend), e `MAYAN_*` quando o Mayan estiver disponível.  
    - Gere um domínio público para a API e anote a URL base (ex. `https://ged-api-production.up.railway.app`).
 
 5. **Serviço Web (Next)** — **novo serviço** no mesmo projeto, mesmo repositório:  
