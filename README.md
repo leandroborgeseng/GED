@@ -131,5 +131,6 @@ Guia detalhado (vários serviços, `railway.toml` por app, limitações do Mayan
 
 ## Documentação adicional
 
+- **Só Mayan primeiro (local ou Railway):** [`docs/mayan-primeiro.md`](docs/mayan-primeiro.md)
 - Railway (API + Web + Mayan): [`docs/railway-setup.md`](docs/railway-setup.md)
 - Planejamento futuro (editor rich / PDF): [`docs/planejamento-editor-rico-despacho-pdf.md`](docs/planejamento-editor-rico-despacho-pdf.md)
