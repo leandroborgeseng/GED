@@ -5,16 +5,20 @@ COPY package.json package-lock.json* ./
 COPY apps/frontend/package.json apps/frontend/
 COPY packages/types/package.json packages/types/
 COPY packages/ui/package.json packages/ui/
-# Lockfile gerado noutro OS pode não materializar optional deps Linux; o binding é obrigatório no build.
+# Optional deps nativas (Linux) + lockfile único na raiz — evita npm #4828 com apps/frontend/package-lock.json.
 RUN npm ci --workspace=frontend --workspaces --if-present && \
   LCSS_VER=$(node -p "require('./apps/frontend/node_modules/lightningcss/package.json').version") && \
-  npm install -w frontend "lightningcss-linux-x64-gnu@${LCSS_VER}" --no-save
+  npm install -w frontend "lightningcss-linux-x64-gnu@${LCSS_VER}" --no-save && \
+  OX_VER=$(node -p "require('./apps/frontend/node_modules/@tailwindcss/oxide/package.json').version") && \
+  npm install -w frontend "@tailwindcss/oxide-linux-x64-gnu@${OX_VER}" --no-save
 
 FROM node:22-bookworm-slim AS builder
 WORKDIR /repo
 COPY --from=deps /repo/node_modules ./node_modules
 COPY --from=deps /repo/apps/frontend/node_modules ./apps/frontend/node_modules
 COPY . .
+# Se ainda existir no contexto (legado), não deixar o Next/npm ver dois lockfiles.
+RUN rm -f apps/frontend/package-lock.json || true
 ENV NEXT_TELEMETRY_DISABLED=1
 ARG NEXT_PUBLIC_API_URL=http://localhost:4000/api
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
