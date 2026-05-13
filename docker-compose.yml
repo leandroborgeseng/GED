@@ -1,7 +1,6 @@
 # Desenvolvimento local: API + Web + Postgres.
-# Mayan EDMS: use o compose oficial (PostgreSQL + Redis + RabbitMQ + app) em paralelo
-# e defina MAYAN_API_URL=http://host.docker.internal:PORTA/api/v4 (Mac/Win) ou o hostname do serviço Mayan na mesma rede Docker.
-# Documentação: https://docs.mayan-edms.com/chapters/docker/install_docker_compose.html
+# Stack completa (GED + Mayan): use docker-compose.homologacao.yml + docker/homolog.env
+# Documentação Mayan: https://docs.mayan-edms.com/chapters/docker/install_docker_compose.html
 
 services:
   postgres:

@@ -13,3 +13,4 @@ coverage
 apps/backend/generated
 apps/backend/.env
 apps/frontend/.env.local
+docker/homolog.local.env

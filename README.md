@@ -59,6 +59,33 @@ docker compose up --build
 
 Defina `JWT_SECRET` e, se usar Mayan, `MAYAN_API_URL`, `MAYAN_USERNAME`, `MAYAN_PASSWORD`, `MAYAN_DOCUMENT_TYPE_ID`.
 
+## Docker homologação (GED + Mayan, um comando)
+
+Sobe **Postgres do GED**, **API**, **Web**, **Mayan EDMS** (Postgres + Redis + RabbitMQ + app) na mesma rede. A API usa `MAYAN_API_URL=http://mayan:8000/api/v4` dentro do Docker.
+
+**Requisitos:** Docker com ~4 GB de RAM livre (primeira subida do Mayan pode levar vários minutos).
+
+```bash
+docker compose -f docker-compose.homologacao.yml --env-file docker/homolog.env up -d --build
+```
+
+**Portas:** web `http://localhost:3000`, API `http://localhost:4000/api`, Mayan `http://localhost:8001`, Postgres do GED `localhost:5432`.
+
+**Primeira execução:**
+
+1. Acompanhe os logs do Mayan até o healthcheck passar: `docker compose -f docker-compose.homologacao.yml logs -f mayan`
+2. Abra **http://localhost:8001** e conclua o assistente de instalação. Crie o superusuário de forma que **usuário e senha** coincidam com `MAYAN_USERNAME` e `MAYAN_PASSWORD` em `docker/homolog.env` (padrão `admin` / `Admin123!`).
+3. Em tipos de documento, confira o **ID** do tipo padrão; se não for `1`, ajuste `MAYAN_DOCUMENT_TYPE_ID` em `docker/homolog.env` (ou copie o arquivo para `docker/homolog.local.env`, altere e use `--env-file docker/homolog.local.env`).
+4. Popule o GED (usuário demo da API):
+
+   ```bash
+   docker compose -f docker-compose.homologacao.yml exec api npx prisma db seed
+   ```
+
+5. Acesse **http://localhost:3000** e faça login com `admin@ged.local` / `Admin123!` (após o seed).
+
+Credenciais e segredos em `docker/homolog.env` são **só para homologação**; não use em produção.
+
 ## Publicar no Railway (GitHub → deploy)
 
 1. **Suba o código no GitHub** (branch `main`):
@@ -83,6 +110,8 @@ Defina `JWT_SECRET` e, se usar Mayan, `MAYAN_API_URL`, `MAYAN_USERNAME`, `MAYAN_
    - Defina também `NEXT_PUBLIC_API_URL` como variável de ambiente em runtime se o Railway propagar para o container do Next standalone.
 
 6. Faça **Redeploy** do frontend após mudar a URL da API, para recompilar com o `NEXT_PUBLIC_*` correto.
+
+**Railway e stack com Mayan:** o Railway não aplica um `docker-compose` inteiro como um único deploy com vários serviços. Para **um ambiente já igual ao compose** (GED + Mayan), o caminho mais simples é uma **VM ou host com Docker** rodando o comando da secção **Docker homologação (GED + Mayan, um comando)** acima. Na Railway, replique **serviços separados** (Postgres GED, Postgres/Redis/Rabbit/Mayan, API GED, Web GED) e as mesmas variáveis de `docker/homolog.env`, com `MAYAN_API_URL` apontando para a URL **interna ou pública** do serviço Mayan.
 
 ## Documentação adicional
 
