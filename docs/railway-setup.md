@@ -8,6 +8,10 @@ Este repositório inclui ficheiros **Config as code** por serviço (cada app na 
 | [`apps/frontend/railway.toml`](apps/frontend/railway.toml) | **GED-Web** (Next.js) | `apps/frontend/Dockerfile` |
 | [`docker/paperless/railway.toml`](docker/paperless/railway.toml) | **Paperless-ngx** | `docker/paperless/Dockerfile` |
 
+## API: comando de arranque (Railway)
+
+O `railway.toml` da API define **`startCommand = "/app/docker-entrypoint.sh"`**. A imagem Docker só contém o Nest em `/app` (sem o monorepo npm na raiz). Se no painel existir **Custom Start Command** com `npm … -w backend` ou `--workspace=backend`, **apaga-o** — isso provoca `No workspaces found` em ciclo no arranque.
+
 ## Quando já tens Postgres e Redis (Paperless) na Railway
 
 Objetivo: **três serviços a partir do mesmo repo** — `Paperless`, `GED-API`, `GED-Web` — mais a infraestrutura que criares.

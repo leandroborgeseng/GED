@@ -27,5 +27,7 @@ builder = "DOCKERFILE"
 dockerfilePath = "apps/backend/Dockerfile"
 
 [deploy]
+# Evita inferência "npm … -w backend": a imagem só tem /app (Nest isolado, sem workspaces).
+startCommand = "/app/docker-entrypoint.sh"
 healthcheckPath = "/api/health"
 restartPolicyType = "ON_FAILURE"

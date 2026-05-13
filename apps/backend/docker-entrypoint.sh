@@ -19,5 +19,5 @@ if [ -z "$JWT_SECRET" ]; then
   echo "==================================================================="
   exit 1
 fi
-npx prisma migrate deploy
+./node_modules/.bin/prisma migrate deploy
 exec node dist/src/main.js

@@ -7,5 +7,6 @@ dockerfilePath = "apps/backend/Dockerfile"
 watchPatterns = ["/apps/backend/**", "/packages/types/**"]
 
 [deploy]
+startCommand = "/app/docker-entrypoint.sh"
 healthcheckPath = "/api/health"
 restartPolicyType = "ON_FAILURE"
