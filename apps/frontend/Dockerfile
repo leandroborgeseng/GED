@@ -5,8 +5,10 @@ COPY package.json package-lock.json* ./
 COPY apps/frontend/package.json apps/frontend/
 COPY packages/types/package.json packages/types/
 COPY packages/ui/package.json packages/ui/
-# O prepare na raiz só corre Husky se existir node_modules/husky (ver package.json na raiz).
-RUN npm ci --workspace=frontend --workspaces --if-present
+# Lockfile gerado noutro OS pode não materializar optional deps Linux; o binding é obrigatório no build.
+RUN npm ci --workspace=frontend --workspaces --if-present && \
+  LCSS_VER=$(node -p "require('./apps/frontend/node_modules/lightningcss/package.json').version") && \
+  npm install -w frontend "lightningcss-linux-x64-gnu@${LCSS_VER}" --no-save
 
 FROM node:22-bookworm-slim AS builder
 WORKDIR /repo
