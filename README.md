@@ -8,6 +8,8 @@ Plataforma GED/PAE (monorepo): **NestJS** (`apps/backend`), **Next.js 15** (`app
 - Docker (para Postgres local) **ou** instância PostgreSQL acessível
 - Opcional: Mayan em execução (uploads e OCR); sem Mayan a API sobe, mas endpoints que chamam o Mayan podem falhar até configurar `MAYAN_*`
 
+**Forma mais simples para desenvolver e testar o GED:** só precisas de **PostgreSQL**. **Redis** e **RabbitMQ** não são usados pela API Nest em si — só entram se fores a correr o **Mayan** (o Mayan usa Redis + RabbitMQ para Celery). Sem Mayan, deixa `MAYAN_USERNAME` / `MAYAN_PASSWORD` vazios no `.env`; login, processos e resto do PAE funcionam, e rotas que falam com o Mayan podem responder vazio ou 503 até configurares o motor documental.
+
 ## Rodar em desenvolvimento
 
 1. **Banco de dados** (Postgres na porta 5432, usuário/senha/db `ged`):
