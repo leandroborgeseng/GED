@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { RequestMethod, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
@@ -17,7 +17,9 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix('api', {
+    exclude: [{ path: '/', method: RequestMethod.GET }],
+  });
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('GED Platform API')
@@ -31,6 +33,6 @@ async function bootstrap() {
   const port = process.env.PORT ?? 4000;
   await app.listen(port);
   // eslint-disable-next-line no-console
-  console.log(`API http://localhost:${port}/api — docs /api/docs`);
+  console.log(`API http://localhost:${port}/ (info) — REST http://localhost:${port}/api — docs /api/docs`);
 }
 bootstrap();
