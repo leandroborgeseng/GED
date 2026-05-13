@@ -7,6 +7,8 @@ dockerfilePath = "apps/frontend/Dockerfile"
 watchPatterns = ["/apps/frontend/**", "/packages/ui/**", "/packages/types/**"]
 
 [deploy]
+# Imagem standalone: não há `next` no PATH — evita inferência `npm run start -w frontend`.
+startCommand = "node apps/frontend/server.js"
 healthcheckPath = "/"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
