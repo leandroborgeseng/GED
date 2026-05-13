@@ -31,6 +31,8 @@ Plataforma GED/PAE (monorepo): **NestJS** (`apps/backend`), **Next.js 15** (`app
    cd apps/backend && npx prisma migrate deploy && npx prisma db seed && cd ../..
    ```
 
+   Se aparecer **P1012 / Environment variable not found: DATABASE_URL**, crie `apps/backend/.env` a partir de `.env.example` (`cp apps/backend/.env.example apps/backend/.env`) ou exporte `DATABASE_URL` antes dos comandos Prisma. O **Dockerfile da API** já define uma URL fictícia só na etapa de build para o `prisma generate` no Railway.
+
 4. **API + frontend** (dois processos):
 
    ```bash

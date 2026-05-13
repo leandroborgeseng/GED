@@ -7,6 +7,9 @@ COPY apps/backend/package*.json ./
 COPY apps/backend/prisma ./prisma/
 RUN npm ci
 COPY apps/backend/ ./
+# Prisma 6 exige DATABASE_URL no schema mesmo para `generate` (não precisa de Postgres acessível no build).
+ARG DATABASE_URL_BUILD=postgresql://build:build@127.0.0.1:5/_prisma_build_only?schema=public
+ENV DATABASE_URL=${DATABASE_URL_BUILD}
 RUN npx prisma generate && npm run build
 
 FROM node:22-bookworm-slim AS runner
